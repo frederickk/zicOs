@@ -34,6 +34,29 @@ make
 # ZICBOX_PATH=/home/alex/Music/zicBox make
 ```
 
+
+⚠️ **MacOS Users are recommended to use a Docker container**
+
+Ensure you have [Docker installed](https://docs.docker.com/desktop/setup/install/mac-install/) and it's running.
+
+```sh
+docker --version
+docker build -t zicos-builder .
+```
+
+With the container created, run the above. We noticed that on some machines you have to run `make` like this:
+
+```sh
+FORCE_UNSAFE_CONFIGURE=1 make
+```
+
+Upon success building, copy out of Docker to MacOS Desktop 
+
+```sh
+docker cp zicos-build:/workspace/zicOs/zero2w64/output/images/sdcard.img ~/Desktop/sdcard.img
+```
+
+
 ## rpi 4
 
 To be done / re-worked
@@ -45,24 +68,7 @@ Use `dmesg` to see log of boot/initialisation of the board.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+---
 
 ## Old stuff
 

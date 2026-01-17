@@ -18,9 +18,7 @@ if [ -n "$ZICBOX_PATH" ]; then
     cp -r "$ZICBOX_PATH"/build/arm/* .
     cp -r "$ZICBOX_PATH"/data ./data
 else
-    wget https://github.com/apiel/zicBox/releases/download/latest/arm_full.zip
-    unzip arm_full.zip
-    rm arm_full.zip
+    echo "Skipping zicBox download - not available"
 fi
 
 ## Install filebrowser: web server for file management

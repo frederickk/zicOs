@@ -1,3 +1,4 @@
 my_wpa_supplicant.conf
 .wpa_supplicant.conf
 output
+*.log
