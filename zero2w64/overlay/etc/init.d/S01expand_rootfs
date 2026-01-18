@@ -1,0 +1,67 @@
+#!/bin/sh
+
+EXPANDED_FLAG="/var/.rootfs_expanded"
+PART_NUM=2
+ROOT_PART="/dev/mmcblk0p${PART_NUM}"
+ROOT_DEV="/dev/mmcblk0"
+
+case "$1" in
+  start)
+    # Check if already expanded
+    if [ -f "$EXPANDED_FLAG" ]; then
+      echo "Root filesystem already expanded."
+      exit 0
+    fi
+
+    echo "Checking if root partition needs expansion..."
+
+    # Get device size in sectors
+    DEV_SIZE=$(cat /sys/block/mmcblk0/size)
+    # Get partition end sector
+    PART_END=$(fdisk -l $ROOT_DEV | grep "${ROOT_PART}" | awk '{print $3}')
+
+    # If partition doesn't use full device, expand it
+    if [ "$PART_END" -lt "$DEV_SIZE" ]; then
+      echo "Expanding root partition..."
+      
+      # Get partition start sector
+      PART_START=$(fdisk -l $ROOT_DEV | grep "${ROOT_PART}" | awk '{print $2}')
+      
+      # Use sfdisk to resize partition
+      echo ",$((DEV_SIZE - PART_START)),L" | sfdisk --no-reread -N ${PART_NUM} ${ROOT_DEV}
+      
+      if [ $? -eq 0 ]; then
+        echo "Partition table updated. Rebooting to apply changes..."
+        touch /var/.rootfs_resized
+        sync
+        reboot
+      else
+        echo "Failed to resize partition"
+        exit 1
+      fi
+    fi
+
+    # If we reach here, partition is already full size
+    # Check if we need to resize the filesystem
+    if [ -f /var/.rootfs_resized ]; then
+      echo "Resizing root filesystem..."
+      resize2fs $ROOT_PART
+      
+      if [ $? -eq 0 ]; then
+        rm -f /var/.rootfs_resized
+        touch $EXPANDED_FLAG
+        echo "Root filesystem expanded successfully!"
+      else
+        echo "Failed to resize filesystem"
+        exit 1
+      fi
+    fi
+    ;;
+  stop)
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+esac
+
+exit 0
